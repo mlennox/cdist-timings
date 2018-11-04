@@ -12,6 +12,9 @@ def setup(dimension):
 
 
 def loop_based(one, two):
+    # timeit needs a reference to an executable method
+    # passing params would replace an executable with the result of the executed method
+    # so we return a function closure instead
     def closure_loop_based():
         most_similar = (-1, -1)
         smallest_cosine = -1
@@ -60,7 +63,7 @@ def run():
         one, one_array, two = setup(dimension)
 
         print("running loop implementation")
-        timer = timeit.Timer(loop(one_array, two))
+        timer = timeit.Timer(loop_based(one_array, two))
         duration_loop = timer.repeat(repeat=loops, number=1)
         # print("durations", duration_loop)
         loop_avg = sum(duration_loop) / len(duration_loop)
