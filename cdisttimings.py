@@ -35,7 +35,6 @@ def loop_based(one, two):
             if smallest_cosine == -1 or smallest_cosine > distance_matrix[min_index]:
                 smallest_cosine = distance_matrix[min_index]
                 most_similar = (row_index, min_index)
-        # print("Smallest at {0}".format(most_similar))
 
     return closure_loop_based
 
@@ -45,14 +44,7 @@ def vectorised(one, two, dimension):
         most_similar = (-1, -1)
         smallest_cosine = -1
         distance_matrix = spatial.distance.cdist(one, two, "cosine").reshape(-1)
-        # print(
-        #     "vector distance shape (should be {0} x {0} = {1}) : {2}".format(
-        #         dimension, dimension * dimension, distance_matrix.shape
-        #     )
-        # )
         min_index = argmin(distance_matrix)
-        # print("min index", min_index)
-        # print("at ({0}, {1})".format(min_index // dimension, min_index % dimension))
 
     return closure_vectorised
 
@@ -68,51 +60,78 @@ def run():
 
     Each timing loop we save the list of durations generated for each `repeats` and at
     the end of the `loops` we find the average of each implementations duration and 
-    calculate how much faster the vectorised implementation is
+    calculate how much faster the vectorised implementation
+
+    We also loop through a range of dimensions to see how the average speed of the 
+    implementations changes with matrix size
     """
-    loops = 2
-    repeats = 30
-    dimension = 1000
-    vector_length = 100
-    loop_based_duration_averages = []
-    vectorised_duration_averages = []
+    loops = 3
+    repeats = 5
+    dimension_range = {"start": 1000, "step": 2500, "repeat": 4}
+    vector_length_range = {"start": 100, "step": 100, "repeat": 4}
+    averages = []  # columns will be dimension, vector_length, loop avg, vector avg
 
-    print("Starting benchmarks, running {0} loops".format(loops))
-
-    for loops_index in range(0, loops):
-        print("Timing run {0}".format(loops_index + 1))
-        print("-  = - = - = - = - = - = - = - = - = - = - = - = - = - = -")
-
-        # we create a new set of test data each loop and pass same to both implementations
-        one, one_array, two = setup(dimension, vector_length)
-
-        print("running loop implementation")
-        timer = timeit.Timer(loop_based(one_array, two))
-        # repeat the timing `repeats` times but only execute function once per repeat
-        duration_loop = timer.repeat(repeat=repeats, number=1)
-        # duration_loop will be a list of timings of length `repeats`
-        loop_based_duration_averages.extend(duration_loop)
-        print(
-            "average loop duration = {0}".format(
-                sum(duration_loop) / len(duration_loop)
+    for dimension in range(
+        dimension_range["start"],
+        dimension_range["start"]
+        + (dimension_range["step"] * dimension_range["repeat"]),
+        dimension_range["step"],
+    ):
+        for vector_length in range(
+            vector_length_range["start"],
+            vector_length_range["start"]
+            + (vector_length_range["step"] * vector_length_range["repeat"]),
+            vector_length_range["step"],
+        ):
+            loop_based_duration_averages = []
+            vectorised_duration_averages = []
+            print()
+            print(
+                "Starting benchmarks for matrix shape ({0}, {1}) running {2} loops with {3} repeat timings for each implementation".format(
+                    dimension, vector_length, loops, repeats
+                )
             )
-        )
 
-        print("running vectorised implementation")
-        timer = timeit.Timer(vectorised(one, two, dimension))
-        duration_vector = timer.repeat(repeat=repeats, number=1)
-        vectorised_duration_averages.extend(duration_vector)
-        print(
-            "average vectorised duration = {0}".format(
-                sum(duration_vector) / len(duration_vector)
+            for loops_index in range(0, loops):
+                print()
+                print("Timing run {0}".format(loops_index + 1))
+
+                # we create a new set of test data each loop and pass same to both implementations
+                one, one_array, two = setup(dimension, vector_length)
+
+                print("running loop implementation")
+                timer = timeit.Timer(loop_based(one_array, two))
+                # repeat the timing `repeats` times but only execute function once per repeat
+                duration_loop = timer.repeat(repeat=repeats, number=1)
+                # duration_loop will be a list of timings of length `repeats`
+                loop_based_duration_averages.extend(duration_loop)
+                print(
+                    "average loop duration = {0}".format(
+                        sum(duration_loop) / len(duration_loop)
+                    )
+                )
+
+                print("running vectorised implementation")
+                timer = timeit.Timer(vectorised(one, two, dimension))
+                duration_vector = timer.repeat(repeat=repeats, number=1)
+                vectorised_duration_averages.extend(duration_vector)
+                print(
+                    "average vectorised duration = {0}".format(
+                        sum(duration_vector) / len(duration_vector)
+                    )
+                )
+
+            loop_avg = sum(loop_based_duration_averages) / len(
+                loop_based_duration_averages
             )
-        )
+            vectorised_avg = sum(vectorised_duration_averages) / len(
+                vectorised_duration_averages
+            )
+            print("vectorised is {0} times faster".format(loop_avg / vectorised_avg))
 
-    loop_avg = sum(loop_based_duration_averages) / len(loop_based_duration_averages)
-    vectorised_avg = sum(vectorised_duration_averages) / len(
-        vectorised_duration_averages
-    )
-    print("vectorised is {0} times faster".format(loop_avg / vectorised_avg))
+            averages.extend([dimension, vector_length, loop_avg, vectorised_avg])
+
+          print(averages)
 
 
 run()
