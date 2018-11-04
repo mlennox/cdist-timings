@@ -60,13 +60,17 @@ def vectorised(one, two, dimension):
 def run():
     """
     We run our timings `loops` times generating a new set of matrices each timing loop
-    The timings are repeated with the same data `repeats` times
-    We generate matrices that are
-    """
 
-    # how many times we create new test data and time the implementations
+    The timings are repeated with the same data `repeats` times
+
+    We generate matrices that are the same dimensions in each timing loop but in reality
+    there would be far more rows in the word embedding model
+
+    Each timing loop we save the list of durations generated for each `repeats` and at
+    the end of the `loops` we find the average of each implementations duration and 
+    calculate how much faster the vectorised implementation is
+    """
     loops = 2
-    #
     repeats = 30
     dimension = 1000
     vector_length = 100
@@ -77,6 +81,7 @@ def run():
 
     for loops_index in range(0, loops):
         print("Timing run {0}".format(loops_index + 1))
+        print("-  = - = - = - = - = - = - = - = - = - = - = - = - = - = -")
 
         # we create a new set of test data each loop and pass same to both implementations
         one, one_array, two = setup(dimension, vector_length)
