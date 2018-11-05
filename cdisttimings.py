@@ -67,8 +67,8 @@ def run():
     """
     loops = 3
     repeats = 5
-    dimension_range = {"start": 1000, "step": 2500, "repeat": 4}
-    vector_length_range = {"start": 100, "step": 100, "repeat": 4}
+    dimension_range = {"start": 500, "step": 250, "repeat": 4}
+    vector_length_range = {"start": 100, "step": 25, "repeat": 4}
     averages = []  # columns will be dimension, vector_length, loop avg, vector avg
 
     for dimension in range(
