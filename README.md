@@ -6,18 +6,18 @@ As part of creating an encoder/decoder model, we want to find the `cosine` dista
 
 ## pre-requisites
 
-- Python 3.6.6 / pip 18.0 (I use Pyenv and virutalenv)
+- Python 3.6.3 / pip 18.0 (I use Pyenv and virutalenv)
 
 ### Preparing the environment
 
 The `setup.sh` script may be helpful in setting up your environment, assuming you have already installed `pyenv` and `virtualenv` (see my tutorial [Python dependency - hell no!](http://www.webpusher.ie/2018/09/19/python-dependency-hell-no/))
 
+As you need to use Seaborn, which requires `matplotlib` you will need to have installed Python 3.6.3 as a framework, using Pyenv. This is relatively easy, [see my tutorial on installing](https://www.webpusher.ie/2018/07/07/pyenv-matplotlib-high-sierra/)
+
 The script contains the following
 
 ```bash
-pyenv install 3.6.6
-pyenv rehash
-pyenv virtualenv 3.6.6 cdisttimings
+pyenv virtualenv 3.6.3 cdisttimings
 pyenv local cdisttimings
 
 pip install -U pip
