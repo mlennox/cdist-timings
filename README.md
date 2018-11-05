@@ -91,8 +91,8 @@ To plot the data we calculate the total dimension by multiplying the `x` and `y`
 
 ### Results
 
-The gain is _only_ a factor of 2, but the implementation is also much simpler.
+The gain is _only_ a factor of 2, but the implementation is also much simpler. In the case of the vectorised implementation we receive a list of distances of length `x-dimension * y-dimension` and we can simply find the smallest index using `mod` and `div`.
 
-You scatter plot should look something like
+Your scatter plot should resemble
 
 ![](./duration_scatter.png)
