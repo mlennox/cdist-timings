@@ -1,8 +1,10 @@
-# benchmarking cosine similarity implementations
+# Benchmarking cosine similarity implementations
 
-Benchmarking scipy.spatial.distance.cdist implementations.
+As part of creating an encoder/decoder model, we want to find the `cosine` distance between each row in one array and each row in a second using `scipy.spatial.distance.cdist`. One implementation will loop through the first array row by row, find the cosine distance and keep track of the lowest value. The second will take a vectorised approach to find the cosine similarity between the two matrices and then find the smallest cosine distance for each row.
 
-As part of creating an encoder/decoder model, we want to find the `cosine` distance between each row in one array and each row in a second. One implementation will loop through the first array row by row, find the cosine distance and keep track of the lowest value. The second will take a vectorised approach to find the cosine similarity between the two matrices and then find the smallest cosine distance for each row.
+## Motivation
+
+A tutorial I was following used a loop implementation of the `cdist` search, I vectorised it in my own code, but I wanted to know what the benefit was in real terms. The exercise of semi-formally benchmarking the implementations was also useful.
 
 ## pre-requisites
 
@@ -34,3 +36,46 @@ The use-case here is finding similarities between the word embeddings in two mat
 The Euclidian distance finds the geometrical distance between the vectors, while the cosine distance (or similarity) finds the angle between the vectors.
 
 ![](./Figure1.png)
+
+## Running the benchmark
+
+You can run the script using the command
+
+```bash
+python cdisttimings.py
+```
+
+This will produce output resembling
+
+```bash
+Starting benchmarks for matrix shape (1250, 150) running 3 loops with 5 repeat timings for each implementation
+
+Timing run 1
+running loop implementation
+average loop duration = 0.5097540697548538
+running vectorised implementation
+average vectorised duration = 0.23319520922377707
+
+Timing run 2
+running loop implementation
+average loop duration = 0.5055707193911075
+running vectorised implementation
+average vectorised duration = 0.23917289525270463
+
+Timing run 3
+running loop implementation
+average loop duration = 0.5063449165783822
+running vectorised implementation
+average vectorised duration = 0.2333633008878678
+vectorised is 2.1561598281696814 times faster
+```
+
+The script will create a scatter plot of the timing data for running the loop implementation compared to the vectorised implementation.
+
+### Results
+
+The gain is _only_ a factor of 2, but the implementation is also much simpler.
+
+You scatter plot should look something like
+
+![](./duration_scatter.png)
