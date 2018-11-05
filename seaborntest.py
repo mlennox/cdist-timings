@@ -1,7 +1,10 @@
-# import seaborn
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from pandas import DataFrame
 from numpy import reshape
+
+sns.set(style="darkgrid")
 
 data = [
     500,
@@ -966,6 +969,18 @@ data = [
     0.2754148331005126,
 ]
 
+
+# NOTE need melt to make multiple data points on same plot
 table = reshape(data, (-1, 4))
 print(table.shape)
-df = DataFrame(data=table, columns=["dimension", "vector", "loopdur", "vectoriseddur"])
+df = DataFrame(data=table, columns=["dimension", "vector", "loop", "vectorised"])
+df["total_dimension"] = df.dimension * df.vector
+melted = df.melt(
+    id_vars=["total_dimension"],
+    value_vars=["loop", "vectorised"],
+    var_name="durations_label",
+    value_name="durations",
+)
+
+sns.relplot(x="total_dimension", y="durations", hue="durations_label", data=melted)
+plt.savefig("./test.png")
