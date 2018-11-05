@@ -129,9 +129,18 @@ def run():
             )
             print("vectorised is {0} times faster".format(loop_avg / vectorised_avg))
 
-            averages.extend([dimension, vector_length, loop_avg, vectorised_avg])
+            # now we store each measured duration in a dataset that we will plot
+            for index in range(len(loop_based_duration_averages)):
+                averages.extend(
+                    [
+                        dimension,
+                        vector_length,
+                        loop_based_duration_averages[index],
+                        vectorised_duration_averages[index],
+                    ]
+                )
 
-          print(averages)
+    print(averages)
 
 
 run()
