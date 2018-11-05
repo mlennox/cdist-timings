@@ -1,52 +1,9 @@
 from scipy import spatial
 from numpy import reshape, array, argmin, random
 import timeit
-
-
-def setup(dimension, vector_length):
-    """
-    Generates two arrays filled with random values of shape (dimension, vector_length)
-    
-    Arguments:
-      dimension {int} -- the number of rows - this is meant to represent the number of word embeddings
-      vector_length {int} -- the length of the word embedding vector
-    
-    Returns:
-      tuple of the two arrays and the listified array for the loop implementation
-    """
-
-    one = random.rand(dimension, vector_length)
-    two = random.rand(dimension, vector_length)
-    one_array = [reshape(row, (1, -1)) for row in one]
-    return (one, one_array, two)
-
-
-def loop_based(one, two):
-    # timeit needs a reference to an executable method
-    # passing params would replace an executable with the result of the executed method
-    # so we return a function closure instead
-    def closure_loop_based():
-        most_similar = (-1, -1)
-        smallest_cosine = -1
-        for row_index in range(1, len(one)):
-            row = one[row_index]
-            distance_matrix = spatial.distance.cdist(row, two, "cosine").reshape(-1)
-            min_index = argmin(distance_matrix)
-            if smallest_cosine == -1 or smallest_cosine > distance_matrix[min_index]:
-                smallest_cosine = distance_matrix[min_index]
-                most_similar = (row_index, min_index)
-
-    return closure_loop_based
-
-
-def vectorised(one, two, dimension):
-    def closure_vectorised():
-        most_similar = (-1, -1)
-        smallest_cosine = -1
-        distance_matrix = spatial.distance.cdist(one, two, "cosine").reshape(-1)
-        min_index = argmin(distance_matrix)
-
-    return closure_vectorised
+from seaborn import relplot, set as snsset
+from matplotlib.pyplot import savefig
+from pandas import DataFrame
 
 
 def run():
@@ -69,7 +26,7 @@ def run():
     repeats = 5
     dimension_range = {"start": 500, "step": 250, "repeat": 4}
     vector_length_range = {"start": 100, "step": 25, "repeat": 4}
-    averages = []  # columns will be dimension, vector_length, loop avg, vector avg
+    duration_data = []  # columns will be dimension, vector_length, loop avg, vector avg
 
     for dimension in range(
         dimension_range["start"],
@@ -131,7 +88,7 @@ def run():
 
             # now we store each measured duration in a dataset that we will plot
             for index in range(len(loop_based_duration_averages)):
-                averages.extend(
+                duration_data.extend(
                     [
                         dimension,
                         vector_length,
@@ -140,7 +97,79 @@ def run():
                     ]
                 )
 
-    print(averages)
+    plot(duration_data)
+    # print(duration_data)
+
+
+def setup(dimension, vector_length):
+    """
+    Generates two arrays filled with random values of shape (dimension, vector_length)
+    
+    Arguments:
+      dimension {int} -- the number of rows - this is meant to represent the number of word embeddings
+      vector_length {int} -- the length of the word embedding vector
+    
+    Returns:
+      tuple of the two arrays and the listified array for the loop implementation
+    """
+
+    one = random.rand(dimension, vector_length)
+    two = random.rand(dimension, vector_length)
+    one_array = [reshape(row, (1, -1)) for row in one]
+    return (one, one_array, two)
+
+
+def loop_based(one, two):
+    # timeit needs a reference to an executable method
+    # passing params would replace an executable with the result of the executed method
+    # so we return a function closure instead
+    def closure_loop_based():
+        most_similar = (-1, -1)
+        smallest_cosine = -1
+        for row_index in range(1, len(one)):
+            row = one[row_index]
+            distance_matrix = spatial.distance.cdist(row, two, "cosine").reshape(-1)
+            min_index = argmin(distance_matrix)
+            if smallest_cosine == -1 or smallest_cosine > distance_matrix[min_index]:
+                smallest_cosine = distance_matrix[min_index]
+                most_similar = (row_index, min_index)
+
+    return closure_loop_based
+
+
+def vectorised(one, two, dimension):
+    def closure_vectorised():
+        most_similar = (-1, -1)
+        smallest_cosine = -1
+        distance_matrix = spatial.distance.cdist(one, two, "cosine").reshape(-1)
+        min_index = argmin(distance_matrix)
+
+    return closure_vectorised
+
+
+def plot(duration_data):
+    """
+    Scatter plot of the timing data which will show the loop implementation
+    consistently takes twice the time of the vectorised version
+    
+    Arguments:
+      duration_data {[type]} -- [description]
+    """
+
+    snsset(style="darkgrid")
+    table = reshape(duration_data, (-1, 4))
+    print(table.shape)
+    df = DataFrame(data=table, columns=["dimension", "vector", "loop", "vectorised"])
+    df["total_dimension"] = df.dimension * df.vector
+    melted = df.melt(
+        id_vars=["total_dimension"],
+        value_vars=["loop", "vectorised"],
+        var_name="durations_label",
+        value_name="durations",
+    )
+
+    relplot(x="total_dimension", y="durations", hue="durations_label", data=melted)
+    savefig("./duration_scatter.png")
 
 
 run()
